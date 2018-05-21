@@ -3,17 +3,16 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Forum;
-use app\models\ForumSearch;
+use app\models\Post;
 use app\models\PostSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * ForumController implements the CRUD actions for Forum model.
+ * PostController implements the CRUD actions for Post model.
  */
-class ForumController extends Controller
+class PostController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -31,12 +30,12 @@ class ForumController extends Controller
     }
 
     /**
-     * Lists all Forum models.
+     * Lists all Post models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new ForumSearch();
+        $searchModel = new PostSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -46,36 +45,31 @@ class ForumController extends Controller
     }
 
     /**
-     * Displays a single Forum model.
+     * Displays a single Post model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
     {
-        $searchModel = new PostSearch([
-            'forum_id' => $id,
-        ]);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
         return $this->render('view', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
             'model' => $this->findModel($id),
         ]);
     }
 
     /**
-     * Creates a new Forum model.
+     * Creates a new Post model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($forum_id)
     {
-        $model = new Forum();
+        $model = new Post([
+            'forum_id' => $forum_id,
+        ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['/forum/view', 'id' => $forum_id]);
         }
 
         return $this->render('create', [
@@ -84,7 +78,7 @@ class ForumController extends Controller
     }
 
     /**
-     * Updates an existing Forum model.
+     * Updates an existing Post model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -104,7 +98,7 @@ class ForumController extends Controller
     }
 
     /**
-     * Deletes an existing Forum model.
+     * Deletes an existing Post model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -118,15 +112,15 @@ class ForumController extends Controller
     }
 
     /**
-     * Finds the Forum model based on its primary key value.
+     * Finds the Post model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Forum the loaded model
+     * @return Post the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Forum::findOne($id)) !== null) {
+        if (($model = Post::findOne($id)) !== null) {
             return $model;
         }
 
