@@ -23,6 +23,15 @@ $config = [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+                [
+                    'class' => 'yii\log\DbTarget',
+                    'levels' => ['info', 'trace'],
+                    'categories' => ['user*'],
+                    'logVars' => [], // disable append context message
+                    'prefix' => function() {
+                        return Yii::$app->user->isGuest ? 'Guest' : Yii::$app->user->identity->username;
+                    },
+                ],
             ],
         ],
         'db' => $db,

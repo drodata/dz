@@ -8,13 +8,15 @@ $config = [
     'name' => 'DZ Demo',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+	'language' => 'zh-CN',
+	'timeZone' => 'Asia/Shanghai',
+	'defaultRoute' => 'site',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'hello',
         ],
         'cache' => [
@@ -22,7 +24,8 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            //'enableAutoLogin' => true,
+            'on afterLogin' => ['app\models\User', 'syncLoginTime'],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -34,6 +37,15 @@ $config = [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+                [
+                    'class' => 'yii\log\DbTarget',
+                    'levels' => ['info', 'trace'],
+                    'categories' => ['user*'],
+                    'logVars' => [],
+                    'prefix' => function() {
+                        return Yii::$app->user->isGuest ? 'Guest' : Yii::$app->user->identity->username;
+                    },
+                ],
             ],
         ],
         'db' => $db,
@@ -43,6 +55,14 @@ $config = [
             'rules' => [
             ],
         ],
+        'formatter' => [
+            'dateFormat' => 'php:Y-m-d',
+            'timeFormat' => 'H:i',
+            'datetimeFormat' => 'php:Y-m-d H:i',
+            'decimalSeparator' => '.',
+            'thousandSeparator' => ',',
+            'defaultTimeZone' => 'Asia/Shanghai',
+       ],
     ],
     'params' => $params,
 ];

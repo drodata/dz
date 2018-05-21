@@ -158,4 +158,13 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    public static function syncLoginTime($event)
+    {
+        $user = $event->identity;
+        $user->updateAttributes(['last_logined_at' => time()]);
+
+        // 写入日志
+        Yii::info('登录系统', 'user.login');
+    }
 }

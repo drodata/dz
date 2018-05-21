@@ -36,9 +36,18 @@ AppAsset::register($this);
         ],
     ]);
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
+        'options' => ['class' => 'navbar-nav navbar-left'],
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
+            ['label' => '圈子', 'url' => ['/forum']],
+            ['label' => '日志', 'url' => ['/log']],
+            ['label' => '用户', 'url' => ['/user']],
+            ['label' => 'Gii', 'url' => ['/gii'], 'visible' => YII_ENV == 'dev'],
+        ],
+    ]);
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav navbar-right'],
+        'items' => [
             ['label' => '注册', 'url' => ['/site/signup'], 'visible' => Yii::$app->user->isGuest],
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
