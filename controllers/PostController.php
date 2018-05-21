@@ -126,4 +126,21 @@ class PostController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+    /**
+     * 点赞
+     */
+    public function actionFavorite($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->wasFavoritedByCurrentUser) {
+            Yii::$app->session->setFlash('danger', '你已点赞过此帖子');
+        } else {
+            $model->favorite();
+            Yii::$app->session->setFlash('success', '点赞成功');
+        }
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
 }

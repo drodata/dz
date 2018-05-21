@@ -24,8 +24,15 @@ use drodata\behaviors\BlameableBehavior;
  * @property PostComment[] $postComments
  * @property PostFavorite $postFavorite
  */
-class Post extends \yii\db\ActiveRecord
+class Post extends \drodata\db\ActiveRecord
 {
+    public function init()
+    {
+        // 新建、删除帖子后更新 `forum.post_count`
+        $this->on(self::EVENT_AFTER_INSERT, [$this->forum, 'syncPostCount']);
+        // 新建帖子后增加 5 个金币
+        $this->on(self::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncCredit'], ['createPost', 5]);
+    }
     /**
      * {@inheritdoc}
      */
@@ -111,5 +118,36 @@ class Post extends \yii\db\ActiveRecord
     public function getPostFavorite()
     {
         return $this->hasOne(PostFavorite::className(), ['post_id' => 'id']);
+    }
+
+    /**
+     * 判断帖子是否被当前登录用户点赞过
+     */
+    public function getWasFavoritedByCurrentUser()
+    {
+        return (bool) PostFavorite::findOne([
+            'post_id' => $this->id,
+            'created_by' => Yii::$app->user->id,
+        ]);
+    }
+
+    /**
+     * 点赞
+     */
+    public function favorite()
+    {
+        $favorite = new PostFavorite([
+            'post_id' => $this->id,
+            'created_by' => Yii::$app->user->id,
+        ]);
+
+        // 点赞后, 点赞人的金币数 -1
+        $favorite->on(PostFavorite::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncCredit'], ['favorite', -1]);
+        // 点赞后, 点赞帖子作者的金币数 +1
+        $favorite->on(PostFavorite::EVENT_AFTER_INSERT, [$favorite->post->creator, 'syncCredit'], ['beFavorited', 1]);
+
+        if (!$favorite->save()) {
+            throw new \yii\db\Exception($favorite->stringifyErrors());
+        }
     }
 }

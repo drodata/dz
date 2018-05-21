@@ -1,6 +1,6 @@
 <?php
 
-use yii\helpers\Html;
+use drodata\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
@@ -19,6 +19,14 @@ echo GridView::widget([
             }
         ],
         'view_count',
-        ['class' => 'yii\grid\ActionColumn'],
+        [
+            'class' => 'yii\grid\ActionColumn',
+            'template' => '{view}',
+            'buttons' => [
+                'view' => function ($url, $model, $key) {
+                    return Html::a('查看', ['/post/view', 'id' => $model->id]);
+                },
+            ],
+        ],
     ],
 ]);

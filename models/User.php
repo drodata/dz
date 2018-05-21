@@ -167,4 +167,34 @@ class User extends ActiveRecord implements IdentityInterface
         // 写入日志
         Yii::info('登录系统', 'user.login');
     }
+
+    /**
+     * 更新金币数
+     */
+    public function syncCredit($event)
+    {
+        list($action, $amount) = $event->data;
+        switch ($action) {
+            case 'createPost':
+                $msg = '发帖';
+                break;
+            case 'favorite':
+                $msg = '点赞别人的帖子';
+                break;
+            case 'beFavorited':
+                $msg = '被别人点赞你的帖子';
+                break;
+        }
+
+        $this->credit += $amount;
+
+        // 积分变动写入日志
+        $amt = $amount > 0 ? '+' . $amount : $amount;
+        $message = "{$msg}，积分{$amt}";
+        Yii::info($message, 'user.credit');
+
+        if (!$this->save()) {
+            throw new \yii\db\Exception('Failed');
+        }
+    }
 }

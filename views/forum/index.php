@@ -20,8 +20,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'itemOptions' => ['class' => 'item'],
         'summary' => '',
-        'itemView' => function ($model, $key, $index, $widget) {
-            return Html::a(Html::encode($model->name), ['view', 'id' => $model->id]) . "<hr>";
-        },
+        'itemView' => '_list-item',
     ]) ?>
 </div>

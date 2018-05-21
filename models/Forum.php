@@ -64,4 +64,17 @@ class Forum extends \yii\db\ActiveRecord
     {
         return new ForumQuery(get_called_class());
     }
+
+    public function syncPostCount($event)
+    {
+        if ($event->name == Post::EVENT_AFTER_INSERT) {
+            $this->post_count++;
+        } else {
+            $this->post_count--;
+        }
+
+        if (!$this->save()) {
+            throw new \yii\db\Exception('Failed');
+        }
+    }
 }
