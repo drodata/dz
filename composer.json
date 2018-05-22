@@ -49,6 +49,13 @@
             ]
         },
         "yii\\composer\\Installer::postInstall": {
+            "setPermission": [
+                {
+                    "runtime": "0777",
+                    "web/assets": "0777",
+                    "yii": "0755"
+                }
+            ],
             "generateCookieValidationKey": [
                 "config/web.php"
             ]
