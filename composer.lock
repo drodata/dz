@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "902fab02636f37100c2860177d0c49ab",
+    "content-hash": "fbd41c48f28762dc4c0ea422ab40205f",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -334,12 +334,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-framework.git",
-                "reference": "7de6aeecbf591ef409789035d9490ada1bc41969"
+                "reference": "503a71d6251fbc8ae15781a97423f8d0f49907fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/7de6aeecbf591ef409789035d9490ada1bc41969",
-                "reference": "7de6aeecbf591ef409789035d9490ada1bc41969",
+                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/503a71d6251fbc8ae15781a97423f8d0f49907fd",
+                "reference": "503a71d6251fbc8ae15781a97423f8d0f49907fd",
                 "shasum": ""
             },
             "require": {
@@ -426,7 +426,7 @@
                 "framework",
                 "yii2"
             ],
-            "time": "2018-05-20T20:17:34+00:00"
+            "time": "2018-05-21T17:19:49+00:00"
         },
         {
             "name": "yiisoft/yii2-bootstrap",
