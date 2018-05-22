@@ -1,6 +1,6 @@
 <?php
 
-use yii\helpers\Html;
+use drodata\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -14,27 +14,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <p class="h6 text-info">wrote on <?= Yii::$app->formatter->asDateTime($model->created_at) ?> by <?= $model->creator->username ?></p>
+
+    <p><?= Html::encode($model->content) ?></p>
+
     <p>
         <?= Html::a('点赞', ['favorite', 'id' => $model->id], [
-            'class' => 'btn btn-success',
             'data' => [
                 'method' => 'post',
             ],
         ]) ?>
     </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'id',
-            'forum_id',
-            'title',
-            'content:ntext',
-            'view_count',
-            'comment_count',
-            'created_at',
-            'created_by',
-        ],
-    ]) ?>
 
 </div>
