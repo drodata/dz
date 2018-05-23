@@ -93,4 +93,12 @@ class PostComment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(PostCommentFavorite::className(), ['post_comment_id' => 'id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreator()
+    {
+        return $this->hasOne(User::className(), ['id' => 'created_by']);
+    }
 }

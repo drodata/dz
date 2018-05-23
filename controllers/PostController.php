@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\Post;
 use app\models\PostSearch;
+use app\models\Comment;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -63,8 +64,18 @@ class PostController extends Controller
      */
     public function actionView($id)
     {
+        $comment = new Comment();
+
+        // `comment` 记录新建后 写入 `post_comment` 记录
+        $comment->on(Comment::EVENT_AFTER_INSERT, [$comment, 'insertPostComment'], $id);
+
+        if ($comment->load(Yii::$app->request->post()) && $comment->save()) {
+            Yii::$app->session->setFlash('success', '评论成功');
+        }
+
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'comment' => $comment,
         ]);
     }
 

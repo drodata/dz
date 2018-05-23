@@ -5,6 +5,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Post */
+/* @var $comment app\models\Comment */
 
 $this->title = $model->title;
 $this->params['breadcrumbs'][] = ['label' => 'Posts', 'url' => ['index']];
@@ -26,4 +27,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <hr>
+
+    <h3>评论</h3>
+
+    <?php if (Yii::$app->user->isGuest): ?>
+    <p>
+        <?= Html::a('登录', '/site/login') ?>后参与评论。
+    </p>
+    <?php else: ?>
+        <?= $this->render('/post-comment/_list', ['dataProvider' => $model->commentsDataProvider]) ?>
+        <?= $this->render('/comment/_form', ['model' => $comment]) ?>
+    <?php endif; ?>
 </div>

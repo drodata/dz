@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\data\ActiveDataProvider;
 use drodata\helpers\Html;
 use drodata\behaviors\TimestampBehavior;
 use drodata\behaviors\BlameableBehavior;
@@ -107,7 +108,7 @@ class Post extends \drodata\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getPostComments()
+    public function getComments()
     {
         return $this->hasMany(PostComment::className(), ['post_id' => 'id']);
     }
@@ -118,6 +119,17 @@ class Post extends \drodata\db\ActiveRecord
     public function getPostFavorite()
     {
         return $this->hasOne(PostFavorite::className(), ['post_id' => 'id']);
+    }
+
+    /**
+     *
+     * @return ActiveDataProvider
+     */
+    public function getCommentsDataProvider()
+    {
+        return new ActiveDataProvider([
+            'query' => $this->getComments()->orderBy('created_at'),
+        ]);
     }
 
     /**

@@ -51,4 +51,21 @@ class Comment extends \yii\db\ActiveRecord
     {
         return $this->hasMany(PostComment::className(), ['comment_id' => 'id']);
     }
+
+    /**
+     * 通用评论记录创建后，向 post_comment 写入记录
+     *
+     * @param int $event->data 帖子 ID
+     */
+    public function insertPostComment($event)
+    {
+        $comment = new PostComment([
+            'post_id' => $event->data,
+            'comment_id' => $this->id,
+        ]);
+
+        if (!$comment->save()) {
+            throw new \yii\db\Exception('Failed');
+        }
+    }
 }
