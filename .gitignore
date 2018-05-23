@@ -34,3 +34,6 @@ tests/_support/_generated
 
 *.vim-session
 *.sw*
+
+# sensitive info (e.g. pswd)
+config/sensitive.json

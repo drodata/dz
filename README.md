@@ -12,7 +12,7 @@
 
 ### 1.3 配置
 
-- 编辑 `config/db.php`, 将 `password` 属性设置为自己的数据库密码；
+- 在 `config/` 目录下，复制 `sensitive.json.sample` 为 `sensitive.json`, 并修改 `sensitive.json` 内的密码为自己的数据库密码(注意文件安全性)；
 - 配置 Apache, 使其能够正常访问，搭建成功的首页截图如下：
 
 ![Screenshot](screenshot.png)
