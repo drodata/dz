@@ -27,6 +27,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'credit',
             //'status',
             //'group',
+            [
+                'attribute' => 'group',
+                'value' => function ($model, $key, $index, $column) {
+                    return $model->groupName($model->group);
+                },
+            ],
             'created_at:datetime',
             'last_logined_at:relativeTime',
 

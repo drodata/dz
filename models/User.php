@@ -10,6 +10,7 @@ use drodata\helpers\Html;
 use drodata\behaviors\TimestampBehavior;
 use drodata\behaviors\BlameableBehavior;
 use drodata\behaviors\LookupBehavior;
+use app\events\UserGroupUpgradeEvent;
 
 /**
  * User model
@@ -29,9 +30,21 @@ use drodata\behaviors\LookupBehavior;
  */
 class User extends ActiveRecord implements IdentityInterface
 {
+    // 用户组升级事件
+    const EVENT_GROUP_UPGRADED = 'group-upgraded';
+
     const STATUS_ACTIVE = 1;
 
+    const GROUP_BRONZE = 1; // 铜牌会员
+    const GROUP_SILVER = 2; // 银牌会员
+    const GROUP_GOLD = 3; // 金牌会员
+    const GROUP_DIAMOND = 4; // 钻石会员
 
+
+    public function init()
+    {
+        $this->on(self::EVENT_GROUP_UPGRADED, [$this, 'logGroupUgrade']);
+    }
     /**
      * {@inheritdoc}
      */
@@ -159,6 +172,18 @@ class User extends ActiveRecord implements IdentityInterface
         $this->password_reset_token = null;
     }
 
+    public function groupName($group)
+    {
+        $map = [
+            self::GROUP_BRONZE => '铜牌会员',
+            self::GROUP_SILVER => '银牌会员',
+            self::GROUP_GOLD => '金牌会员',
+            self::GROUP_DIAMOND => '钻石牌会员',
+        ];
+
+        return $map[$group];
+    }
+
     public static function syncLoginTime($event)
     {
         $user = $event->identity;
@@ -184,6 +209,9 @@ class User extends ActiveRecord implements IdentityInterface
             case 'beFavorited':
                 $msg = '被别人点赞你的帖子';
                 break;
+            case 'createComment':
+                $msg = '发表评论';
+                break;
         }
 
         $this->credit += $amount;
@@ -193,8 +221,36 @@ class User extends ActiveRecord implements IdentityInterface
         $message = "{$msg}，积分{$amt}";
         Yii::info($message, 'user.credit');
 
+
+        // 根据当前积分判断是否升级用户组
+
+        $group = ($this->credit - $this->credit%10)/10 + 1;
+        if ($this->group < $group) {
+            $oldGroup = $this->group;
+            $this->group = $group;
+
+            $event = new UserGroupUpgradeEvent([
+                'oldGroupName' => $this->groupName($oldGroup),
+                'newGroupName' => $this->groupName($group),
+            ]);
+
+            // 这里我们触发了自定义事件，通过向该事件上绑定 handler (已在开头 init() 内绑定), 我们可以做更多的事情
+            $this->trigger(self::EVENT_GROUP_UPGRADED, $event);
+        }
+
         if (!$this->save()) {
             throw new \yii\db\Exception('Failed');
         }
+    }
+
+    /**
+     * 用户升级后，计入日志
+     * @param UserGroupUpgradeEvent $event
+     */
+    public function logGroupUgrade($event)
+    {
+        $message = "等级从{$event->oldGroupName}升级为{$event->oldGroupName}";
+
+        Yii::info($message, 'user.upgrade');
     }
 }

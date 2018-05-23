@@ -18,7 +18,7 @@ echo GridView::widget([
                 return $model->creator->username;
             }
         ],
-        'view_count',
+        'comment_count',
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{view}',

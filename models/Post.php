@@ -162,4 +162,20 @@ class Post extends \drodata\db\ActiveRecord
             throw new \yii\db\Exception($favorite->stringifyErrors());
         }
     }
+
+    /**
+     * 新建、删除评论后同步 `post.comment_count`
+     */
+    public function syncCommentCount($event)
+    {
+        if ($event->name == Comment::EVENT_AFTER_INSERT) {
+            $this->comment_count++;
+        } else {
+            $this->comment_count--;
+        }
+
+        if (!$this->save()) {
+            throw new \yii\db\Exception('Failed');
+        }
+    }
 }
