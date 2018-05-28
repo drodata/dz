@@ -21,9 +21,8 @@ use app\events\UserGroupUpgradeEvent;
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $email
- * @property integer $credit
  * @property integer $status
- * @property integer $group
+ * @property integer $group_id
  * @property integer $created_at
  * @property integer $updated_at
  * @property integer $last_logined_at
@@ -32,17 +31,11 @@ class User extends ActiveRecord implements IdentityInterface
 {
     // 用户组升级事件
     const EVENT_GROUP_UPGRADED = 'group-upgraded';
-
     const STATUS_ACTIVE = 1;
-
-    const GROUP_BRONZE = 1; // 铜牌会员
-    const GROUP_SILVER = 2; // 银牌会员
-    const GROUP_GOLD = 3; // 金牌会员
-    const GROUP_DIAMOND = 4; // 钻石会员
-
 
     public function init()
     {
+        $this->on(self::EVENT_AFTER_INSERT, [$this, 'initData']);
         $this->on(self::EVENT_GROUP_UPGRADED, [$this, 'logGroupUgrade']);
     }
     /**
@@ -72,7 +65,9 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            ['group_id', 'default', 'value' => 1],
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
+            ['group_id', 'required'],
         ];
     }
 
@@ -103,6 +98,20 @@ class User extends ActiveRecord implements IdentityInterface
         return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroup()
+    {
+        return $this->hasOne(Group::className(), ['id' => 'group_id']);
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getData()
+    {
+        return $this->hasOne(UserData::className(), ['user_id' => 'id']);
+    }
     /**
      * {@inheritdoc}
      */
@@ -170,18 +179,6 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
-    }
-
-    public function groupName($group)
-    {
-        $map = [
-            self::GROUP_BRONZE => '铜牌会员',
-            self::GROUP_SILVER => '银牌会员',
-            self::GROUP_GOLD => '金牌会员',
-            self::GROUP_DIAMOND => '钻石牌会员',
-        ];
-
-        return $map[$group];
     }
 
     public static function syncLoginTime($event)
@@ -252,5 +249,16 @@ class User extends ActiveRecord implements IdentityInterface
         $message = "等级从{$event->oldGroupName}升级为{$event->oldGroupName}";
 
         Yii::info($message, 'user.upgrade');
+    }
+
+    /**
+     * 新建用户后，初始化 user_data 
+     */
+    public function initData($event)
+    {
+        $data = new UserData(['user_id' => $this->id]);
+        if (!$data->save()) {
+            throw new \yii\db\Exception('Failed');
+        }
     }
 }

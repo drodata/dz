@@ -41,6 +41,7 @@ AppAsset::register($this);
             ['label' => '圈子', 'url' => ['/forum']],
             ['label' => '日志', 'url' => ['/log']],
             ['label' => '用户', 'url' => ['/user']],
+            ['label' => '用户组', 'url' => ['/group']],
             ['label' => 'Gii', 'url' => ['/gii'], 'visible' => YII_ENV == 'dev'],
         ],
     ]);

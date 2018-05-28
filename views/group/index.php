@@ -2,19 +2,22 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
-use app\models\Group;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\UserSearch */
+/* @var $searchModel app\models\GroupSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Users';
+$this->title = 'Groups';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="user-index">
+<div class="group-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <p>
+        <?= Html::a('Create Group', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -23,17 +26,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'id',
-            'username',
-            'email:email',
-            [
-                'attribute' => 'group_id',
-                'filter' => Group::list(),
-                'value' => function ($model, $key, $index, $column) {
-                    return $model->group->name;
-                },
-            ],
-            'created_at:datetime',
-            'last_logined_at:relativeTime',
+            'name',
+            'min',
+            'max',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
