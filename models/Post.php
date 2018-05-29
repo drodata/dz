@@ -31,8 +31,8 @@ class Post extends \drodata\db\ActiveRecord
     {
         // 新建、删除帖子后更新 `forum.post_count`
         $this->on(self::EVENT_AFTER_INSERT, [$this->forum, 'syncPostCount']);
-        // 新建帖子后增加 5 个金币
-        $this->on(self::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncCredit'], ['createPost', 5]);
+        // 新建帖子后同步用户数据
+        $this->on(self::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncData'], 'create-post');
     }
     /**
      * {@inheritdoc}
@@ -154,9 +154,9 @@ class Post extends \drodata\db\ActiveRecord
         ]);
 
         // 点赞后, 点赞人的金币数 -1
-        $favorite->on(PostFavorite::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncCredit'], ['favorite', -1]);
+        $favorite->on(PostFavorite::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncData'], 'favorite-post');
         // 点赞后, 点赞帖子作者的金币数 +1
-        $favorite->on(PostFavorite::EVENT_AFTER_INSERT, [$favorite->post->creator, 'syncCredit'], ['beFavorited', 1]);
+        $favorite->on(PostFavorite::EVENT_AFTER_INSERT, [$favorite->post->creator, 'syncData'], 'post-be-favorited');
 
         if (!$favorite->save()) {
             throw new \yii\db\Exception($favorite->stringifyErrors());

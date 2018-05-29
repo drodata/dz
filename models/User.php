@@ -31,11 +31,14 @@ class User extends ActiveRecord implements IdentityInterface
 {
     // 用户组升级事件
     const EVENT_GROUP_UPGRADED = 'group-upgraded';
+
     const STATUS_ACTIVE = 1;
 
     public function init()
     {
         $this->on(self::EVENT_AFTER_INSERT, [$this, 'initData']);
+
+        $this->on(self::EVENT_GROUP_UPGRADED, [$this, 'syncGroupId']);
         $this->on(self::EVENT_GROUP_UPGRADED, [$this, 'logGroupUgrade']);
     }
     /**
@@ -129,6 +132,41 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
+     * 根据 user_data 各积分列计算用户的总积分数
+     */
+    public function getCredits()
+    {
+        // 确保读取最新值
+        unset($this->data);
+
+        return $this->data->credit1 * 2
+            + $this->data->credit2 * 3 
+            + $this->data->credit3
+            + $this->data->credit4;
+    }
+
+    /**
+     * 根据用户总积分，检查用户等级变化情况
+     *
+     * @return app\models\Group[] 当用户组没有变化时，仅返回当前用户组实例，
+     * 否则返回变化前后的用户组实例。通过检查返回值元素的个数就能判断用户是否发生变化
+     */
+    public function checkGroup()
+    {
+        $credits = $this->getCredits();
+
+        $oldGroup = $this->group;
+        $newGroup = Group::find()->where(['<=', 'min', $credits])
+            ->andWhere(['>=', 'max', $credits])->one();
+
+        if ($newGroup->id > $oldGroup->id) {
+            return [$oldGroup, $newGroup];
+        } else {
+            return [$oldGroup];
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function validateAuthKey($authKey)
@@ -191,62 +229,74 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * 更新金币数
+     * 同步用户数据(user_data)
+     * 由发帖后等操作触发
+     *
+     * @param string $event->data 操作名称，例如：'create-post' 等
      */
-    public function syncCredit($event)
+    public function syncData($event)
     {
-        list($action, $amount) = $event->data;
-        switch ($action) {
-            case 'createPost':
-                $msg = '发帖';
+        switch ($event->data) {
+            case 'create-post': // 发帖
+                $credits = [
+                    'credit1' => 5,
+                    'credit2' => 3,
+                ];
                 break;
-            case 'favorite':
-                $msg = '点赞别人的帖子';
+            case 'create-comment': // 评论帖子
+                $credits = [
+                    'credit1' => 2,
+                    'credit2' => 1,
+                ];
                 break;
-            case 'beFavorited':
-                $msg = '被别人点赞你的帖子';
+            case 'favorite-post': // 点赞别人的帖子
+                $credits = [
+                    'credit1' => -1,
+                ];
                 break;
-            case 'createComment':
-                $msg = '发表评论';
+            case 'post-be-favorited': // 帖子被人点赞
+                $credits = [
+                    'credit1' => 1,
+                ];
                 break;
         }
+        $this->data->updateCounters($credits);
 
-        $this->credit += $amount;
+        // 积分改变后检查等级是否改变
+        $groups = $this->checkGroup();
 
-        // 积分变动写入日志
-        $amt = $amount > 0 ? '+' . $amount : $amount;
-        $message = "{$msg}，积分{$amt}";
-        Yii::info($message, 'user.credit');
+        if (count($groups) > 1) {
 
-
-        // 根据当前积分判断是否升级用户组
-
-        $group = ($this->credit - $this->credit%10)/10 + 1;
-        if ($this->group < $group) {
-            $oldGroup = $this->group;
-            $this->group = $group;
+            list($oldGroup, $newGroup) = $groups;
 
             $event = new UserGroupUpgradeEvent([
-                'oldGroupName' => $this->groupName($oldGroup),
-                'newGroupName' => $this->groupName($group),
+                'oldGroup' => $oldGroup,
+                'newGroup' => $newGroup,
             ]);
 
-            // 这里我们触发了自定义事件，通过向该事件上绑定 handler (已在开头 init() 内绑定), 我们可以做更多的事情
             $this->trigger(self::EVENT_GROUP_UPGRADED, $event);
         }
+    }
+
+    /**
+     * 用户升级后，更新 user.group_id
+     * @param UserGroupUpgradeEvent $event
+     */
+    public function syncGroupId($event)
+    {
+        $this->group_id = $event->newGroup->id;
 
         if (!$this->save()) {
             throw new \yii\db\Exception('Failed');
         }
     }
-
     /**
      * 用户升级后，计入日志
      * @param UserGroupUpgradeEvent $event
      */
     public function logGroupUgrade($event)
     {
-        $message = "等级从{$event->oldGroupName}升级为{$event->oldGroupName}";
+        $message = "等级从{$event->oldGroup->name}升级为{$event->oldGroup->name}";
 
         Yii::info($message, 'user.upgrade');
     }

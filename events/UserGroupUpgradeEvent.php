@@ -7,9 +7,15 @@ use yii\base\Event;
 
 class UserGroupUpgradeEvent extends Event
 {
-    // 升级前的等级名称
-    public $oldGroupName;
+    /**
+     * @var app\models\Group 升级前的用户组实例
+     *
+     */
+    public $oldGroup;
 
-    // 升级后的等级名称
-    public $newGroupName;
+    /**
+     * @var app\models\Group 升级后的用户组实例
+     *
+     */
+    public $newGroup;
 }

@@ -40,13 +40,13 @@ class m180528_121832_create_table_group_and_user_data extends Migration
         );
 
         $this->addColumn('user', 'group_id', $this->integer()->notNull()->defaultValue(1)->after('email'));
-        $this->batchInsert('group', ['name', 'min'], [
-            ['Level 1', 30],
-            ['Level 2', 70],
-            ['Level 3', 100],
-            ['Level 4', 150],
-            ['Level 5', 200],
-            ['Level 6', 500],
+        $this->batchInsert('group', ['name', 'min', 'max'], [
+            ['Level 1', 0, 29],
+            ['Level 2', 30, 69],
+            ['Level 3', 70, 99],
+            ['Level 4', 100, 149],
+            ['Level 5', 150, 199],
+            ['Level 6', 200, 499],
         ]);
         $this->addForeignKey(
             'fk-user-group',
