@@ -17,6 +17,10 @@
 
 ![Screenshot](screenshot.png)
 
+### 1.4 Migration
+
+在控制台执行 `./yii migrate` 完成数据库迁移。
+
 ## 二 使用
 
 > 提示：先点击右上角“注册”，注册一个帐号。
