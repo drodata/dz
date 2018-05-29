@@ -26,8 +26,8 @@ class PostComment extends \yii\db\ActiveRecord
     {
         // 新建、删除评论后更新 `post.comment_count`
         $this->on(self::EVENT_AFTER_INSERT, [$this->post, 'syncCommentCount']);
-        // 新建评论后增加 3 个金币
-        $this->on(self::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncCredit'], ['createComment', 3]);
+        // 新建评论后调整评论者积分
+        $this->on(self::EVENT_AFTER_INSERT, [Yii::$app->user->identity, 'syncData'], 'create-comment');
     }
     /**
      * {@inheritdoc}

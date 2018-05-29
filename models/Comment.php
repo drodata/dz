@@ -59,12 +59,15 @@ class Comment extends \yii\db\ActiveRecord
      */
     public function insertPostComment($event)
     {
-        $comment = new PostComment([
+        $postComment = new PostComment([
             'post_id' => $event->data,
             'comment_id' => $this->id,
         ]);
 
-        if (!$comment->save()) {
+        // 新建评论后调整帖子作者积分
+        $postComment->on(PostComment::EVENT_AFTER_INSERT, [$postComment->post->creator, 'syncData'], 'post-be-commented');
+
+        if (!$postComment->save()) {
             throw new \yii\db\Exception('Failed');
         }
     }

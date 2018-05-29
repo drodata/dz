@@ -237,34 +237,52 @@ class User extends ActiveRecord implements IdentityInterface
     public function syncData($event)
     {
         switch ($event->data) {
-            case 'create-post': // 发帖
+            case 'create-post':
                 $credits = [
                     'credit1' => 5,
                     'credit2' => 3,
                 ];
+                $action = '发帖';
+                $bonus = "credit1 + 5, credit2 + 3";
                 break;
-            case 'create-comment': // 评论帖子
+            case 'create-comment':
                 $credits = [
                     'credit1' => 2,
-                    'credit2' => 1,
+                    'credit2' => 3,
                 ];
+                $action = '评论别人的帖子';
+                $bonus = "credit1 + 2, credit2 + 3";
                 break;
-            case 'favorite-post': // 点赞别人的帖子
+            case 'post-be-commented':
+                $credits = [
+                    'credit3' => 1,
+                ];
+                $action = '帖子被别人评论';
+                $bonus = "credit3 + 1";
+                break;
+            case 'favorite-post':
                 $credits = [
                     'credit1' => -1,
                 ];
+                $action = '点赞别人的帖子';
+                $bonus = "credit1 - 1";
                 break;
-            case 'post-be-favorited': // 帖子被人点赞
+            case 'post-be-favorited':
                 $credits = [
                     'credit1' => 1,
                 ];
+                $action = '帖子被人点赞';
+                $bonus = "credit1 + 1";
                 break;
         }
         $this->data->updateCounters($credits);
 
+        // 计入积分日志
+        Yii::info($action . $bonus, 'user.credit');
+
+
         // 积分改变后检查等级是否改变
         $groups = $this->checkGroup();
-
         if (count($groups) > 1) {
 
             list($oldGroup, $newGroup) = $groups;
@@ -296,7 +314,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function logGroupUgrade($event)
     {
-        $message = "等级从{$event->oldGroup->name}升级为{$event->oldGroup->name}";
+        $message = "等级从{$event->oldGroup->name}升级为{$event->newGroup->name}";
 
         Yii::info($message, 'user.upgrade');
     }
